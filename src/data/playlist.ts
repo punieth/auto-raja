@@ -1,7 +1,7 @@
 /** Auto Raja — single YouTube playlist (audio via hidden player) */
 export const playlist = {
-  id: "PLJjBNE6iPKm0",
-  url: "https://www.youtube.com/playlist?list=PLJjBNE6iPKm0",
+  id: "PLTws91ganYS8",
+  url: "https://www.youtube.com/playlist?list=PLTws91ganYS8",
 } as const;
 
 /** Custom start timestamps (in seconds) for each of the 19 playlist tracks */
