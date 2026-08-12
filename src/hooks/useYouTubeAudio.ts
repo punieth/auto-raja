@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { playlist } from "@/data/playlist";
+import { playlist, trackStartTimes } from "@/data/playlist";
 import { brand } from "@/lib/brand";
 
 declare global {
@@ -31,6 +31,7 @@ interface YTPlayer {
   nextVideo: () => void;
   previousVideo: () => void;
   playVideoAt: (index: number) => void;
+  seekTo: (seconds: number, allowSeekAhead: boolean) => void;
   getPlayerState: () => number;
   getPlaylist: () => string[] | null | undefined;
   getPlaylistIndex: () => number;
@@ -92,6 +93,7 @@ function readNowPlaying(player: YTPlayer): NowPlaying {
 export function useYouTubeAudio() {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const playerRef = useRef<YTPlayer | null>(null);
+  const seekedTrackRef = useRef<number | null>(null);
   const [playing, setPlaying] = useState(false);
   const [ready, setReady] = useState(false);
   const [now, setNow] = useState<NowPlaying>({
@@ -155,9 +157,20 @@ export function useYouTubeAudio() {
           onStateChange: (e: { data: number }) => {
             if (!window.YT || destroyed) return;
             const S = window.YT.PlayerState;
+            const p = playerRef.current;
             if (e.data === S.PLAYING) {
               setPlaying(true);
               refreshMeta();
+              if (p) {
+                const currentIndex = p.getPlaylistIndex?.() ?? 0;
+                if (seekedTrackRef.current !== currentIndex) {
+                  seekedTrackRef.current = currentIndex;
+                  const startTime = trackStartTimes[currentIndex];
+                  if (startTime !== undefined && startTime > 0) {
+                    p.seekTo(startTime, true);
+                  }
+                }
+              }
             }
             if (e.data === S.PAUSED) setPlaying(false);
             if (e.data === S.BUFFERING || e.data === S.CUED) refreshMeta();
