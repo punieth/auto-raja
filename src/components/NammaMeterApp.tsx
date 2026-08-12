@@ -32,7 +32,7 @@ export function NammaMeterApp() {
         <img
           src="/auto-raja-sunny-day.png?v=original-restored"
           alt="Auto Raja driving on a sunny day in Bangalore"
-          className="hero-main absolute inset-0 h-full w-full select-none object-cover object-center"
+          className="hero-main absolute inset-0 h-full w-full select-none object-contain object-center"
           draggable={false}
           decoding="async"
           fetchPriority="high"
