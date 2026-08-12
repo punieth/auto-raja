@@ -88,9 +88,6 @@ export function Player() {
                 <p className="truncate text-[15px] font-semibold leading-tight text-white sm:text-base">
                   {now.title}
                 </p>
-                <p className="truncate text-xs text-white/45 sm:text-[13px]">
-                  {now.author}
-                </p>
               </div>
 
               <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
