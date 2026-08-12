@@ -1,10 +1,22 @@
 "use client";
 
+import { useEffect } from "react";
 import { Header } from "./Header";
 import { Player } from "./Player";
 import { TitleOverlay } from "./TitleOverlay";
 
 export function NammaMeterApp() {
+  useEffect(() => {
+    if (typeof window !== "undefined" && !sessionStorage.getItem("ar_tracked")) {
+      sessionStorage.setItem("ar_tracked", "1");
+      fetch("/api/track", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ referrer: document.referrer }),
+      }).catch(() => {});
+    }
+  }, []);
+
   return (
     <div className="app-shell fixed inset-0 overflow-hidden bg-[#0a0a0c] text-white">
       <div className="hero-stage pointer-events-none absolute inset-0">
