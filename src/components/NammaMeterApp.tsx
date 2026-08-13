@@ -22,7 +22,7 @@ export function NammaMeterApp() {
       <div className="hero-stage pointer-events-none absolute inset-0">
         {/* Mobile Blur */}
         <img
-          src="/auto-portrait.png?v=portrait-v1"
+          src="/auto-portrait.png?v=portrait-v3"
           alt=""
           aria-hidden
           className="hero-blur absolute inset-0 h-full w-full scale-110 object-cover opacity-70 blur-2xl sm:hidden"
@@ -40,9 +40,9 @@ export function NammaMeterApp() {
 
         {/* Mobile View Image */}
         <img
-          src="/auto-portrait.png?v=portrait-v1"
+          src="/auto-portrait.png?v=portrait-v3"
           alt="Auto Raja driving on a sunny day in Bangalore"
-          className="hero-main absolute inset-0 h-full w-full select-none object-cover object-center sm:hidden"
+          className="hero-main absolute inset-0 h-full w-full select-none object-fill object-center sm:hidden"
           draggable={false}
           decoding="async"
           fetchPriority="high"
