@@ -133,7 +133,7 @@ export function useYouTubeAudio() {
         playerVars: {
           listType: "playlist",
           list: playlist.id,
-          autoplay: 0,
+          autoplay: 1,
           controls: 0,
           disablekb: 1,
           fs: 0,
@@ -146,7 +146,11 @@ export function useYouTubeAudio() {
           onReady: () => {
             if (destroyed) return;
             setReady(true);
-            // Playlist is cued via playerVars (autoplay: 0) — don't force play
+            try {
+              playerRef.current?.playVideo();
+            } catch {
+              /* browser autoplay policy */
+            }
             window.setTimeout(() => {
               if (!destroyed) refreshMeta();
             }, 400);
@@ -204,6 +208,31 @@ export function useYouTubeAudio() {
       setPlaying(false);
     };
   }, [refreshMeta]);
+
+  useEffect(() => {
+    if (!ready || playing) return;
+
+    const handleFirstInteraction = () => {
+      const p = playerRef.current;
+      if (p && ready) {
+        try {
+          p.playVideo();
+        } catch {
+          /* ignore */
+        }
+      }
+    };
+
+    window.addEventListener("click", handleFirstInteraction, { once: true });
+    window.addEventListener("touchstart", handleFirstInteraction, { once: true });
+    window.addEventListener("keydown", handleFirstInteraction, { once: true });
+
+    return () => {
+      window.removeEventListener("click", handleFirstInteraction);
+      window.removeEventListener("touchstart", handleFirstInteraction);
+      window.removeEventListener("keydown", handleFirstInteraction);
+    };
+  }, [ready, playing]);
 
   const toggle = useCallback(() => {
     const p = playerRef.current;
