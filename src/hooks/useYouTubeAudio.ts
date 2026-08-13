@@ -32,6 +32,9 @@ interface YTPlayer {
   previousVideo: () => void;
   playVideoAt: (index: number) => void;
   seekTo: (seconds: number, allowSeekAhead: boolean) => void;
+  mute: () => void;
+  unMute: () => void;
+  isMuted: () => boolean;
   getPlayerState: () => number;
   getPlaylist: () => string[] | null | undefined;
   getPlaylistIndex: () => number;
@@ -133,7 +136,7 @@ export function useYouTubeAudio() {
         playerVars: {
           listType: "playlist",
           list: playlist.id,
-          autoplay: 1,
+          autoplay: 0,
           controls: 0,
           disablekb: 1,
           fs: 0,
@@ -146,11 +149,6 @@ export function useYouTubeAudio() {
           onReady: () => {
             if (destroyed) return;
             setReady(true);
-            try {
-              playerRef.current?.playVideo();
-            } catch {
-              /* browser autoplay policy */
-            }
             window.setTimeout(() => {
               if (!destroyed) refreshMeta();
             }, 400);
@@ -208,31 +206,6 @@ export function useYouTubeAudio() {
       setPlaying(false);
     };
   }, [refreshMeta]);
-
-  useEffect(() => {
-    if (!ready || playing) return;
-
-    const handleFirstInteraction = () => {
-      const p = playerRef.current;
-      if (p && ready) {
-        try {
-          p.playVideo();
-        } catch {
-          /* ignore */
-        }
-      }
-    };
-
-    window.addEventListener("click", handleFirstInteraction, { once: true });
-    window.addEventListener("touchstart", handleFirstInteraction, { once: true });
-    window.addEventListener("keydown", handleFirstInteraction, { once: true });
-
-    return () => {
-      window.removeEventListener("click", handleFirstInteraction);
-      window.removeEventListener("touchstart", handleFirstInteraction);
-      window.removeEventListener("keydown", handleFirstInteraction);
-    };
-  }, [ready, playing]);
 
   const toggle = useCallback(() => {
     const p = playerRef.current;
