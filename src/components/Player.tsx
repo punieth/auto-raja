@@ -6,7 +6,7 @@ import { useYouTubeAudio } from "@/hooks/useYouTubeAudio";
 
 export function Player() {
   const audio = useYouTubeAudio();
-  const { now, playing, ready, toggle, next, prev, playlistUrl } = audio;
+  const { now, playing, buffering, ready, toggle, next, prev, playlistUrl } = audio;
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -74,7 +74,12 @@ export function Player() {
                     AR
                   </div>
                 )}
-                {playing && (
+                {buffering && (
+                  <span className="absolute inset-0 flex items-center justify-center bg-black/65 backdrop-blur-[2px]">
+                    <TapeSpoolIcon />
+                  </span>
+                )}
+                {playing && !buffering && (
                   <span className="absolute inset-x-0 bottom-0 flex h-1 overflow-hidden bg-black/40">
                     <span className="h-full w-full bg-[var(--brand-yellow)]" />
                   </span>
@@ -82,9 +87,19 @@ export function Player() {
               </div>
 
               <div className="min-w-0 flex-1">
-                <p className="mb-0.5 text-[10px] uppercase tracking-[0.14em] text-white/40">
-                  Now playing
-                </p>
+                <div className="mb-0.5 flex items-center gap-2 text-[10px] uppercase tracking-[0.14em]">
+                  <span className="text-white/40">Now playing</span>
+                  {buffering && (
+                    <span className="inline-flex items-center gap-1.5 font-bold tracking-wide text-[var(--brand-yellow)]">
+                      <span className="flex h-2.5 items-end gap-[2px]">
+                        <span className="h-full w-[2px] rounded-full bg-[var(--brand-yellow)] animate-eq-bar-1" />
+                        <span className="h-full w-[2px] rounded-full bg-[var(--brand-yellow)] animate-eq-bar-2" />
+                        <span className="h-full w-[2px] rounded-full bg-[var(--brand-yellow)] animate-eq-bar-3" />
+                      </span>
+                      <span>Tuning…</span>
+                    </span>
+                  )}
+                </div>
                 <p className="truncate text-[15px] font-semibold leading-tight text-white sm:text-base">
                   {now.title}
                 </p>
@@ -98,11 +113,14 @@ export function Player() {
                 <button
                   type="button"
                   onClick={toggle}
-                  disabled={!ready}
-                  className="mx-0.5 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--brand-yellow)] text-black shadow-[0_10px_32px_rgba(245,197,24,0.4)] transition hover:scale-105 active:scale-95 disabled:opacity-50 sm:h-[3.25rem] sm:w-[3.25rem]"
-                  aria-label={playing ? "Pause" : "Play"}
+                  className={`mx-0.5 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--brand-yellow)] text-black transition hover:scale-105 active:scale-95 sm:h-[3.25rem] sm:w-[3.25rem] ${
+                    buffering
+                      ? "shadow-[0_0_24px_rgba(245,197,24,0.7)] ring-2 ring-[var(--brand-yellow)]/60 animate-pulse"
+                      : "shadow-[0_10px_32px_rgba(245,197,24,0.4)]"
+                  }`}
+                  aria-label={buffering ? "Tuning audio" : playing ? "Pause" : "Play"}
                 >
-                  {playing ? <PauseIcon /> : <PlayIcon />}
+                  {buffering ? <EqualizerPlayIcon /> : playing ? <PauseIcon /> : <PlayIcon />}
                 </button>
 
                 <IconButton label="Next" onClick={next}>
@@ -181,6 +199,35 @@ function NextIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
       <path d="M16 6h2v12h-2V6zM6 18l8.5-6L6 6v12z" />
+    </svg>
+  );
+}
+
+function EqualizerPlayIcon() {
+  return (
+    <div className="flex h-5 w-5 items-end justify-center gap-[3px] py-0.5" aria-hidden>
+      <span className="w-[3px] rounded-full bg-black animate-eq-bar-1" />
+      <span className="w-[3px] rounded-full bg-black animate-eq-bar-2" />
+      <span className="w-[3px] rounded-full bg-black animate-eq-bar-3" />
+      <span className="w-[3px] rounded-full bg-black animate-eq-bar-4" />
+    </div>
+  );
+}
+
+function TapeSpoolIcon() {
+  return (
+    <svg
+      width="26"
+      height="26"
+      viewBox="0 0 24 24"
+      fill="none"
+      className="animate-tape-fast-spin text-[var(--brand-yellow)] drop-shadow-[0_0_10px_rgba(245,197,24,0.8)]"
+      aria-hidden
+    >
+      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" strokeDasharray="5 3" />
+      <circle cx="12" cy="12" r="4.5" fill="currentColor" fillOpacity="0.25" stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="12" cy="12" r="2" fill="currentColor" />
+      <path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }

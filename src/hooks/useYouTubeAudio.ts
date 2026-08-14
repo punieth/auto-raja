@@ -97,7 +97,9 @@ export function useYouTubeAudio() {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const playerRef = useRef<YTPlayer | null>(null);
   const seekedTrackRef = useRef<number | null>(null);
+  const wantsPlayRef = useRef<boolean>(false);
   const [playing, setPlaying] = useState(false);
+  const [buffering, setBuffering] = useState(false);
   const [ready, setReady] = useState(false);
   const [now, setNow] = useState<NowPlaying>({
     videoId: "",
@@ -149,6 +151,10 @@ export function useYouTubeAudio() {
           onReady: () => {
             if (destroyed) return;
             setReady(true);
+            const p = playerRef.current;
+            if (wantsPlayRef.current && p) {
+              p.playVideo();
+            }
             window.setTimeout(() => {
               if (!destroyed) refreshMeta();
             }, 400);
@@ -162,6 +168,8 @@ export function useYouTubeAudio() {
             const p = playerRef.current;
             if (e.data === S.PLAYING) {
               setPlaying(true);
+              setBuffering(false);
+              wantsPlayRef.current = true;
               refreshMeta();
               if (p) {
                 const currentIndex = p.getPlaylistIndex?.() ?? 0;
@@ -174,15 +182,28 @@ export function useYouTubeAudio() {
                 }
               }
             }
-            if (e.data === S.PAUSED) setPlaying(false);
-            if (e.data === S.BUFFERING || e.data === S.CUED) refreshMeta();
+            if (e.data === S.PAUSED) {
+              setPlaying(false);
+              setBuffering(false);
+              wantsPlayRef.current = false;
+            }
+            if (e.data === S.BUFFERING) {
+              setBuffering(true);
+              refreshMeta();
+            }
+            if (e.data === S.CUED) {
+              refreshMeta();
+            }
             // Playlist auto-advances on ENDED; just refresh title
             if (e.data === S.ENDED) {
               setPlaying(false);
+              setBuffering(false);
+              wantsPlayRef.current = false;
               window.setTimeout(() => refreshMeta(), 300);
             }
           },
           onError: () => {
+            setBuffering(false);
             // Skip broken videos in playlist
             try {
               playerRef.current?.nextVideo();
@@ -204,23 +225,37 @@ export function useYouTubeAudio() {
       playerRef.current = null;
       setReady(false);
       setPlaying(false);
+      setBuffering(false);
     };
   }, [refreshMeta]);
 
   const toggle = useCallback(() => {
     const p = playerRef.current;
-    if (!p || !window.YT) return;
+    if (!p || !window.YT) {
+      wantsPlayRef.current = !wantsPlayRef.current;
+      setBuffering(wantsPlayRef.current);
+      return;
+    }
     const state = p.getPlayerState();
-    if (state === window.YT.PlayerState.PLAYING) p.pauseVideo();
-    else p.playVideo();
+    if (state === window.YT.PlayerState.PLAYING) {
+      wantsPlayRef.current = false;
+      setBuffering(false);
+      p.pauseVideo();
+    } else {
+      wantsPlayRef.current = true;
+      setBuffering(true);
+      p.playVideo();
+    }
   }, []);
 
   const next = useCallback(() => {
+    setBuffering(true);
     playerRef.current?.nextVideo();
     window.setTimeout(refreshMeta, 350);
   }, [refreshMeta]);
 
   const prev = useCallback(() => {
+    setBuffering(true);
     playerRef.current?.previousVideo();
     window.setTimeout(refreshMeta, 350);
   }, [refreshMeta]);
@@ -228,6 +263,7 @@ export function useYouTubeAudio() {
   return {
     hostRef,
     playing,
+    buffering,
     ready,
     now,
     playlistUrl: playlist.url,
