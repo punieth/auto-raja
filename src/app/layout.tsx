@@ -59,6 +59,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="preconnect" href="https://www.youtube.com" />
+        <link rel="preconnect" href="https://www.google.com" />
+        <link rel="preconnect" href="https://i.ytimg.com" />
+        <link rel="dns-prefetch" href="https://www.youtube.com" />
+        <link rel="dns-prefetch" href="https://googlevideo.com" />
+        <link rel="dns-prefetch" href="https://i.ytimg.com" />
+        <link rel="preload" href="https://www.youtube.com/iframe_api" as="script" />
+      </head>
       <body
         className={`${dmSans.variable} ${bebasNeue.variable} ${notoKannada.variable} antialiased`}
       >
