@@ -29,15 +29,6 @@ export function Player() {
     return () => window.removeEventListener("keydown", onKey);
   }, [toggle, next, prev]);
 
-  const openUrl = now.videoId
-    ? `https://www.youtube.com/watch?v=${now.videoId}&list=PLJjBNE6iPKm0`
-    : playlistUrl;
-
-  const totalLabel =
-    now.total > 0
-      ? `${String(now.index + 1).padStart(2, "0")}/${String(now.total).padStart(2, "0")}`
-      : "··/··";
-
   return (
     <>
       <div ref={audio.hostRef} className="yt-audio-host" aria-hidden />
@@ -134,7 +125,7 @@ export function Player() {
                 Meter running · ಹಾಡು unlimited
               </span>
               <a
-                href={openUrl}
+                href={playlistUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-[10px] text-white/35 transition hover:text-white/70"
